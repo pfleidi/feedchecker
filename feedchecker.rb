@@ -41,6 +41,7 @@ require 'rss/2.0'
 require 'open-uri'
 require 'date'
 require 'trollop'
+require 'peach'
 
 class Feedchecker
 
@@ -49,15 +50,10 @@ class Feedchecker
    end
 
    def check_feeds
-      threads = Array.new
-      read_opml.each do |feed|
-         threads << Thread.new(feed) do |myFeed|
-            resp = get_response(myFeed)
-            puts resp unless resp.nil?
-         end
+      output = read_opml.pmap(4) do |feed|
+         get_response(feed)
       end
-      threads.each { |aThread|  aThread.join }
-      
+      output.each { |out| puts out unless out.nil? }
    end
 
    private
@@ -68,16 +64,20 @@ class Feedchecker
       begin
          ht = URI.parse(url)
          timeout(@options[:timeout]) do
-            response = Net::HTTP.get_response(ht)
-            check = case response
-            when Net::HTTPRedirection   then    " Redirect ... new URI: #{response['location']}"
-            when Net::HTTPForbidden     then    " Forbidden ... check URI"
-            when Net::HTTPNotFound      then    " Not found ... check URI"
+
+            Net::HTTP.start(ht.host, ht.port) do |http|
+               response = http.head(ht.request_uri)
+               check = case response
+               when Net::HTTPRedirection   then    " Redirect ... new URI: #{response['location']}"
+               when Net::HTTPForbidden     then    " Forbidden ... check URI"
+               when Net::HTTPNotFound      then    " Not found ... check URI"
+               end
             end
+            
          end
       rescue TimeoutError
          check = " Connection timed out"
-      rescue SocketError => socket_error
+      rescue SocketError
          check = " #{ht.host} not found"
       rescue Errno::ECONNRESET, Errno::EPIPE, Errno::ECONNREFUSED
          check =  " Connection to #{ht.host} failed!"
