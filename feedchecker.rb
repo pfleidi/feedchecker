@@ -50,10 +50,12 @@ class Feedchecker
    end
 
    def check_feeds
-      output = read_opml.pmap(4) do |feed|
+      responses = read_opml.pmap(4) do |feed|
          get_response(feed)
       end
-      output.each { |out| puts out unless out.nil? }
+
+      output = responses.find_all { |item| !item.nil? }
+      output.sort.each { |out| puts out}
    end
 
    private
