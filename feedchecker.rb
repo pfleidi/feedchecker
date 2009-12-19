@@ -149,8 +149,8 @@ where [options] are:
    opt :age,      "Specify the minimum age in days", :default => 365
 end
 
-if (!(File.exist?(options[:input]) if options[:input]) || options[:input].nil?)
-   Trollop::die "must specify an existant input file" unless File.exist?(options[:input]) if options[:input]
+if (options[:input].nil? or !File.exist?(options[:input]))
+   Trollop::die "must specify an existant input file"
 end
 
 checker = Feedchecker.new(options)
