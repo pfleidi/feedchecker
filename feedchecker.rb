@@ -53,7 +53,7 @@ class Feedchecker
       read_opml.each do |feed|
          threads << Thread.new(feed) do |myFeed|
             resp = get_response(myFeed)
-            puts resp if !resp.nil?
+            puts resp unless resp.nil?
          end
       end
       threads.each { |aThread|  aThread.join }
