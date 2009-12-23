@@ -33,7 +33,9 @@
 #   Copyright (c) 2009 Sven Pfleiderer. Licensed under GPL Version 2:
 #   http://www.gnu.org/licenses/gpl-2.0.html
 
+require 'rubygems'
 require 'net/http'
+require 'net/https'
 require 'uri'
 require 'rexml/document'
 require 'rss/1.0'
