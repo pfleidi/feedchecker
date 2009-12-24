@@ -151,7 +151,7 @@ where [options] are:
    opt :input,    "Input opml file", :type => String
    opt :timeout,  "Timeout interval in seconds", :default => 60
    opt :age,      "Specify the minimum age in days", :default => 365
-   opt :threads,   "Specify the amount of parallel threads", :default => 2
+   opt :threads,   "Specify the amount of parallel threads", :default => 5
 end
 
 if (options[:input].nil? or !File.exist?(options[:input]))
