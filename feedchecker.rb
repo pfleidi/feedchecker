@@ -20,11 +20,16 @@
 #   For help use: feedchecker.rb -h
 #
 # == Options
-#   -h, --help          Displays help message
-#   -e, --version       Display the version
-#   -i, --input         Secify an input file
-#   -t, --timeout       Specify a timeout interval in seconds
-#   -a, --age           Specify the minimum age in days
+#
+# feedchecker.rb [options] -i <filename>
+#
+# where [options] are:
+#    --input, -i <s>:   Input opml file
+#  --timeout, -t <i>:   Timeout interval in seconds (default: 60)
+#      --age, -a <i>:   Specify the minimum age in days (default: 365)
+#   --threads, -h <i>:   Specify the amount of parallel threads (default: 2)
+#      --version, -v:   Print version and exit
+#         --help, -e:   Show the help message
 #
 # == Author
 #   Sven Pfleiderer
@@ -52,7 +57,7 @@ class Feedchecker
    end
 
    def check_feeds
-      responses = read_opml.pmap(4) do |feed|
+      responses = read_opml.pmap(@options[:threads]) do |feed|
          get_response(feed)
       end
 
@@ -109,24 +114,19 @@ class Feedchecker
       end
    end
 
-   def parse_opml(opml_node)
+   def parse_opml(document)
       feeds = Array.new
-      opml_node.elements.each('outline') do |el|
-         el.elements.each('outline') do |fe|
-            if (fe.attributes['xmlUrl'])
-               feeds.push(fe.attributes['xmlUrl'])
-            end
-         end
+      REXML::XPath.each(document, "//outline[@htmlUrl]") do |fe|
+         feeds << fe.attributes['xmlUrl']
       end
-
       feeds
    end
 
    def read_opml
       begin
-         content = File.read(@options[:input])
-         opml = REXML::Document.new(content)
-         feeds = parse_opml(opml.elements['opml/body'])
+         opml_file = File.read(@options[:input])
+         opml_document = REXML::Document.new(opml_file)
+         feeds = parse_opml(opml_document)
       rescue NoMethodError
          puts "File #{@options[:input]} could not be parsed!"
       rescue
@@ -151,6 +151,7 @@ where [options] are:
    opt :input,    "Input opml file", :type => String
    opt :timeout,  "Timeout interval in seconds", :default => 60
    opt :age,      "Specify the minimum age in days", :default => 365
+   opt :threads,   "Specify the amount of parallel threads", :default => 2
 end
 
 if (options[:input].nil? or !File.exist?(options[:input]))
