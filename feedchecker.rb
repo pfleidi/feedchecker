@@ -21,15 +21,21 @@
 #
 # == Options
 #
+# ./feedchecker.rb --help
+# This is a simple, script which takes an opml file and checks all contained feeds for
+# errors.
+#
+# Usage:
+#
 # feedchecker.rb [options] -i <filename>
 #
 # where [options] are:
-#    --input, -i <s>:   Input opml file
-#  --timeout, -t <i>:   Timeout interval in seconds (default: 60)
-#      --age, -a <i>:   Specify the minimum age in days (default: 365)
-#   --threads, -h <i>:   Specify the amount of parallel threads (default: 2)
-#      --version, -v:   Print version and exit
-#         --help, -e:   Show the help message
+#          --input, -i <s>:   Input opml file
+#        --timeout, -t <i>:   Timeout interval in seconds (default: 60)
+#            --age, -a <i>:   Specify the minimum age in days (default: 365)
+#  --fetchparallel, -f <i>:   Specify the amount of feeds to fetch parallel (default: 5)
+#            --version, -v:   Print version and exit
+#               --help, -h:   Show this message
 #
 # == Author
 #   Sven Pfleiderer
@@ -57,7 +63,7 @@ class Feedchecker
    end
 
    def check_feeds
-      responses = read_opml.pmap(@options[:threads]) do |feed|
+      responses = read_opml.pmap(@options[:fetchparallel]) do |feed|
          get_response(feed)
       end
 
@@ -151,7 +157,7 @@ where [options] are:
    opt :input,    "Input opml file", :type => String
    opt :timeout,  "Timeout interval in seconds", :default => 60
    opt :age,      "Specify the minimum age in days", :default => 365
-   opt :threads,   "Specify the amount of parallel threads", :default => 5
+   opt :fetchparallel,   "Specify the amount of feeds to fetch parallel", :default => 5
 end
 
 if (options[:input].nil? or !File.exist?(options[:input]))
