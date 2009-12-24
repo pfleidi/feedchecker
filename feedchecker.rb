@@ -144,7 +144,7 @@ class Feedchecker
 end
 
 options = Trollop::options do
-   version "feedchecker.rb 0.3 (c) 2009 Sven Pfleiderer"
+   version "feedchecker.rb 0.4 (c) 2009 Sven Pfleiderer"
    banner <<-EOS
 This is a simple, script which takes an opml file and checks all contained feeds for errors.
 
