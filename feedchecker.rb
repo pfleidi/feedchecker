@@ -90,7 +90,7 @@ class Feedchecker
             end
             
          end
-      rescue TimeoutError
+      rescue TimeoutError, Errno::ETIMEDOUT
          check = " Connection timed out"
       rescue SocketError
          check = " #{ht.host} not found"
